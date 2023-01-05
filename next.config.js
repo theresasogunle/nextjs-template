@@ -1,6 +1,44 @@
-/** @type {import('next').NextConfig} */
+/** @type {import('next/dist/server/config').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-}
+  poweredByHeader: false,
 
-module.exports = nextConfig
+  // https://reactjs.org/docs/strict-mode.html
+  reactStrictMode: true,
+
+  // The pre-commit hook takes care of linting
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  webpack: (config) => {
+    // https://react-svgr.com/
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: [
+        {
+          loader: "@svgr/webpack",
+          options: {
+            svgoConfig: {
+              plugins: [
+                {
+                  name: "preset-default",
+                  params: {
+                    overrides: {
+                      cleanupIDs: false,
+                      removeViewBox: false,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    return config;
+  },
+};
+
+module.exports = nextConfig;
